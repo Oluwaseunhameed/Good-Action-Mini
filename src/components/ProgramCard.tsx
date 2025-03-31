@@ -65,7 +65,7 @@ export default function ProgramCard({
                 <p>Goal: {ini.goal}</p>
                 <p>Status: {ini.status}</p>
               </div>
-              <button
+              {/* <button
                 onClick={() => {
                   // Trigger edit (for brevity, reusing InitiativeForm with prefill can be implemented here)
                   toast("Edit functionality coming soon!");
@@ -73,7 +73,7 @@ export default function ProgramCard({
                 className="text-yellow-500"
               >
                 Edit
-              </button>
+              </button> */}
             </div>
           ))}
         </div>

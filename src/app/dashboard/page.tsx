@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "@/components/Navbar";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import ProgramCard from "@/components/ProgramCard";
+import { ClipLoader } from "react-spinners";
+
+// Simple sanitization function
+function sanitizeInput(input: string): string {
+  return input.replace(/<[^>]*>?/gm, "").trim();
+}
 
 type Initiative = {
   id: string;
@@ -29,8 +34,8 @@ export default function Dashboard() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [sdgGoal, setSdgGoal] = useState("Goal1");
+  const [loading, setLoading] = useState(false);
 
-  // Fetch programs created by the current nonprofit user
   async function fetchPrograms() {
     const {
       data: { session },
@@ -42,8 +47,7 @@ export default function Dashboard() {
     }
     const { data, error } = await supabase
       .from("Program")
-      // Use the relationship name "Initiative" instead of "initiatives"
-      .select("*, Initiative(*)")
+      .select("*, initiatives:Initiative(*)")
       .eq("userId", user.id);
     if (error) {
       console.error("Error fetching programs:", error);
@@ -59,32 +63,41 @@ export default function Dashboard() {
 
   async function handleCreateProgram(e: React.FormEvent) {
     e.preventDefault();
+    setLoading(true);
 
-    // Fetch the session & user correctly
+    // Sanitize inputs
+    const cleanTitle = sanitizeInput(title);
+    const cleanDescription = sanitizeInput(description);
+    const cleanSdgGoal = sanitizeInput(sdgGoal);
+
     const { data: sessionData, error: sessionError } =
       await supabase.auth.getSession();
     if (sessionError || !sessionData.session) {
       toast.error("Session error: Please log in again.");
+      setLoading(false);
       return;
     }
-
     const user = sessionData.session.user;
     if (!user) {
       toast.error("User not found. Please log in.");
+      setLoading(false);
       return;
     }
 
-    // Insert the program
     const { data, error } = await supabase
-      .from("Program") // Make sure the table name matches your database
+      .from("Program")
       .insert([
-        { title, description, sdgGoal, userId: user.id }, // ✅ Do NOT include "id"
+        {
+          title: cleanTitle,
+          description: cleanDescription,
+          sdgGoal: cleanSdgGoal,
+          userId: user.id,
+        },
       ])
-
-      .select(); // Add this to return the inserted row
+      .select();
 
     if (error) {
-      console.error("Insert Error:", JSON.stringify(error, null, 2)); // Log detailed error
+      console.error("Insert Error:", JSON.stringify(error, null, 2));
       toast.error(`Error: ${error.message}`);
     } else {
       toast.success("Program created successfully!");
@@ -93,15 +106,15 @@ export default function Dashboard() {
       setSdgGoal("Goal1");
       fetchPrograms();
     }
+    setLoading(false);
   }
 
   return (
     <>
-      {/* <Navbar /> */}
-      <div className="max-w-3xl mx-auto my-10">
-        <h1 className="text-3xl mb-6">Dashboard</h1>
-        <div className="border p-4 rounded mb-6">
-          <h2 className="text-xl mb-2">Create a Program</h2>
+      <div className="container mx-auto my-10 px-4">
+        <h1 className="text-3xl font-bold mb-6 text-center">Dashboard</h1>
+        <div className="bg-white shadow rounded p-6 mb-8">
+          <h2 className="text-2xl font-semibold mb-4">Create a Program</h2>
           <form
             onSubmit={handleCreateProgram}
             className="flex flex-col space-y-4"
@@ -111,20 +124,20 @@ export default function Dashboard() {
               placeholder="Program Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="border p-2 rounded"
+              className="border p-3 rounded focus:outline-none focus:ring focus:ring-green-400"
               required
             />
             <textarea
               placeholder="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="border p-2 rounded"
+              className="border p-3 rounded focus:outline-none focus:ring focus:ring-green-400"
               required
             />
             <select
               value={sdgGoal}
               onChange={(e) => setSdgGoal(e.target.value)}
-              className="border p-2 rounded"
+              className="border p-3 rounded focus:outline-none focus:ring focus:ring-green-400"
             >
               <option value="Goal1">Goal1</option>
               <option value="Goal2">Goal2</option>
@@ -132,21 +145,32 @@ export default function Dashboard() {
             </select>
             <button
               type="submit"
-              className="bg-green-600 text-white py-2 rounded"
+              disabled={loading}
+              className="bg-green-600 text-white py-3 rounded hover:bg-green-700 transition-colors flex items-center justify-center"
             >
-              Create Program
+              {loading ? (
+                <ClipLoader size={20} color="#fff" />
+              ) : (
+                "Create Program"
+              )}
             </button>
           </form>
         </div>
         <div>
-          <h2 className="text-2xl mb-4">Your Programs</h2>
-          {programs.map((program) => (
-            <ProgramCard
-              key={program.id}
-              program={program}
-              refreshPrograms={fetchPrograms}
-            />
-          ))}
+          <h2 className="text-2xl font-bold mb-4">Your Programs</h2>
+          {programs.length === 0 ? (
+            <p className="text-center text-gray-600">No programs found.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {programs.map((program) => (
+                <ProgramCard
+                  key={program.id}
+                  program={program}
+                  refreshPrograms={fetchPrograms}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>
