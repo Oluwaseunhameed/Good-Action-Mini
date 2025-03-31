@@ -3,15 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
+import { ClipLoader } from "react-spinners";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState<"NONPROFIT" | "CORPORATE">("NONPROFIT");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -27,7 +30,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        data: { full_name: name },
+        data: { full_name: name, role },
       },
     });
     setLoading(false);
@@ -41,26 +44,34 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Left Side */}
-      <div className="w-1/2 bg-[#0D1527] text-white flex flex-col justify-center items-center px-10">
-        <h1 className="text-4xl font-bold flex items-center gap-2">
-          GOOD
-          <span className="relative inline-block">
-            <AnimatedO />
-          </span>
-          ACTION
-        </h1>
-        <p className="mt-4 text-lg">
-          Empower employees and communities to create positive impact.
-        </p>
+    <div className="flex min-h-screen">
+      {/* Left Side - Hidden on mobile */}
+      <div className="hidden md:flex w-1/2 relative">
+        <Image
+          src="/login-bg.jpg" // Replace with your background image for signup
+          alt="Signup Background"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center p-8">
+          <h1 className="text-4xl font-bold flex items-center gap-2 text-white">
+            GOOD
+            <span className="relative inline-block">
+              <AnimatedO />
+            </span>
+            ACTION
+          </h1>
+          <p className="mt-4 text-lg text-white text-center">
+            Empower employees and communities to create positive impact.
+          </p>
+        </div>
       </div>
 
       {/* Right Side */}
-      <div className="w-1/2 flex justify-center items-center">
+      <div className="w-full md:w-1/2 flex justify-center items-center bg-gray-100">
         <div className="bg-white shadow-lg p-8 rounded-lg w-[400px]">
           <h2 className="text-2xl font-bold text-center">Create an account</h2>
-
           <div className="relative text-center my-4">
             <div className="absolute left-0 top-1/2 w-full border-t border-gray-300"></div>
             <span className="bg-white px-2 relative text-gray-500">
@@ -77,6 +88,7 @@ export default function SignupPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your Name"
+              required
             />
           </div>
 
@@ -89,6 +101,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
+              required
             />
           </div>
 
@@ -101,6 +114,7 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
+              required
             />
             <button
               type="button"
@@ -122,6 +136,7 @@ export default function SignupPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm Password"
+              required
             />
           </div>
 
@@ -129,9 +144,9 @@ export default function SignupPage() {
           <button
             onClick={handleSignup}
             disabled={loading}
-            className="w-full bg-[#0D1527] text-white py-2 rounded-md text-lg hover:bg-[#091020] transition"
+            className="w-full bg-[#0D1527] text-white py-2 rounded-md text-lg hover:bg-[#091020] transition flex items-center justify-center"
           >
-            {loading ? "Signing up..." : "Sign up"}
+            {loading ? <ClipLoader size={20} color="#ffffff" /> : "Sign up"}
           </button>
 
           {/* Login Link */}

@@ -7,6 +7,22 @@ import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
+import { ClipLoader } from "react-spinners";
+
+// Animated "O" in GOODACTION (reuse from Navbar)
+const AnimatedO = () => {
+  return (
+    <svg
+      className="w-6 h-6 animate-spin"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+    >
+      <circle cx="12" cy="12" r="10" strokeWidth="2" />
+      <path d="M12 8v4l2 2" strokeWidth="2" />
+    </svg>
+  );
+};
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -27,14 +43,14 @@ export default function LoginPage() {
       toast.error(error.message);
     } else {
       toast.success("Login successful!");
-      router.push("/programs");
+      router.push("/home");
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Left Side */}
-      <div className="w-1/2 bg-[#0D1527] text-white flex flex-col justify-center items-center px-10">
+    <div className="flex min-h-screen">
+      {/* Left Side - Hidden on mobile */}
+      <div className="hidden md:flex w-1/2 bg-[#0D1527] text-white flex-col justify-center items-center px-10">
         <h1 className="text-4xl font-bold flex items-center gap-2">
           GOOD
           <span className="relative inline-block">
@@ -48,11 +64,12 @@ export default function LoginPage() {
       </div>
 
       {/* Right Side */}
-      <div className="w-1/2 flex justify-center items-center">
+      <div className="flex w-full md:w-1/2 justify-center items-center bg-gray-100">
         <div className="bg-white shadow-lg p-8 rounded-lg w-[400px]">
           <h2 className="text-2xl font-bold text-center">Sign In</h2>
-
-          {/* Social Login Buttons */}
+          {/* <p className="text-center text-gray-600 mb-6">
+            Sign in to your account
+          </p> */}
 
           <div className="relative text-center my-4">
             <div className="absolute left-0 top-1/2 w-full border-t border-gray-300"></div>
@@ -70,6 +87,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
+              required
             />
           </div>
 
@@ -82,6 +100,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
+              required
             />
             <button
               type="button"
@@ -92,9 +111,9 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* <div className="text-right text-green-500 text-sm mb-4">
+          <div className="text-right text-green-500 text-sm mb-4">
             <Link href="/forgot-password">Forgot Password?</Link>
-          </div> */}
+          </div>
 
           {/* Sign In Button */}
           <button
@@ -102,7 +121,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-[#0D1527] text-white py-2 rounded-md text-lg hover:bg-[#091020] transition"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? <ClipLoader size={20} color="#ffffff" /> : "Sign in"}
           </button>
 
           {/* Signup Link */}
@@ -117,18 +136,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-// Animated "O" in GOODACTION
-const AnimatedO = () => {
-  return (
-    <svg
-      className="w-6 h-6 animate-spin"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-    >
-      <circle cx="12" cy="12" r="10" strokeWidth="2" />
-      <path d="M12 8v4l2 2" strokeWidth="2" />
-    </svg>
-  );
-};

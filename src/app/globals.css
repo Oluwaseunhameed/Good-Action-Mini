@@ -10,6 +10,12 @@ body {
   color: #333333;
 }
 
+.bg-hero {
+  background-image: url('/hero.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
 .container {
   max-width: 1280px;
   margin: 0 auto;

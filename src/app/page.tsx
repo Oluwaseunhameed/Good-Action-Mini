@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="relative overflow-hidden bg-[url('/hero-background.jpg')] bg-cover bg-center h-[80vh] flex items-center justify-center">
+    <div className="relative overflow-hidden bg-hero bg-cover bg-center h-[80vh] flex items-center justify-center">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-40"></div>
 
