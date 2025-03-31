@@ -1,83 +1,134 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
-import { ClipLoader } from "react-spinners";
 import Link from "next/link";
-
-// Basic sanitization function (for demo purposes)
-function sanitizeInput(input: string): string {
-  return input.replace(/<[^>]*>?/gm, "").trim();
-}
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { supabase } from "@/lib/supabaseClient";
+import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
+  const handleLogin = async () => {
     setLoading(true);
-
-    const cleanEmail = sanitizeInput(email);
-    const cleanPassword = sanitizeInput(password);
-
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email: cleanEmail,
-      password: cleanPassword,
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
     setLoading(false);
 
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Login successful");
-      const role = data.user?.user_metadata?.role;
-      router.push(role === "NONPROFIT" ? "/dashboard" : "/programs");
+      toast.success("Login successful!");
+      router.push("/dashboard");
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-900 to-gray-800">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Login
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Left Side */}
+      <div className="w-1/2 bg-[#0D1527] text-white flex flex-col justify-center items-center px-10">
+        <h1 className="text-4xl font-bold flex items-center gap-2">
+          GOOD
+          <span className="relative inline-block">
+            <AnimatedO />
+          </span>
+          ACTION
         </h1>
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring focus:ring-green-400"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring focus:ring-green-400"
-            required
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold p-3 rounded transition-colors flex items-center justify-center"
-          >
-            {loading ? <ClipLoader size={20} color="#ffffff" /> : "Login"}
-          </button>
-        </form>
-        <p className="mt-4 text-center text-gray-600">
-          Don't have an account?{" "}
-          <Link href="/auth/signup" className="text-green-600 hover:underline">
-            Signup
-          </Link>
+        <p className="mt-4 text-lg">
+          Empower employees and communities to create positive impact.
         </p>
+      </div>
+
+      {/* Right Side */}
+      <div className="w-1/2 flex justify-center items-center">
+        <div className="bg-white shadow-lg p-8 rounded-lg w-[400px]">
+          <h2 className="text-2xl font-bold text-center">Sign In</h2>
+
+          {/* Social Login Buttons */}
+
+          <div className="relative text-center my-4">
+            <div className="absolute left-0 top-1/2 w-full border-t border-gray-300"></div>
+            <span className="bg-white px-2 relative text-gray-500">
+              With Email & Password
+            </span>
+          </div>
+
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block text-sm text-gray-700">Email</label>
+            <input
+              type="email"
+              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0D1527]"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+            />
+          </div>
+
+          {/* Password */}
+          <div className="mb-4 relative">
+            <label className="block text-sm text-gray-700">Password</label>
+            <input
+              type={showPassword ? "text" : "password"}
+              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0D1527]"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-10 text-gray-600"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+
+          {/* <div className="text-right text-green-500 text-sm mb-4">
+            <Link href="/forgot-password">Forgot Password?</Link>
+          </div> */}
+
+          {/* Sign In Button */}
+          <button
+            onClick={handleLogin}
+            disabled={loading}
+            className="w-full bg-[#0D1527] text-white py-2 rounded-md text-lg hover:bg-[#091020] transition"
+          >
+            {loading ? "Signing in..." : "Sign in"}
+          </button>
+
+          {/* Signup Link */}
+          <p className="text-center text-gray-600 mt-4">
+            Don’t have an account?{" "}
+            <Link href="/auth/signup" className="text-green-500 font-medium">
+              Sign up here
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
 }
+
+// Animated "O" in GOODACTION
+const AnimatedO = () => {
+  return (
+    <svg
+      className="w-6 h-6 animate-spin"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+    >
+      <circle cx="12" cy="12" r="10" strokeWidth="2" />
+      <path d="M12 8v4l2 2" strokeWidth="2" />
+    </svg>
+  );
+};
