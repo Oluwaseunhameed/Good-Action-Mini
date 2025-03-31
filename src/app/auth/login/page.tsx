@@ -111,9 +111,9 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <div className="text-right text-green-500 text-sm mb-4">
+          {/* <div className="text-right text-green-500 text-sm mb-4">
             <Link href="/forgot-password">Forgot Password?</Link>
-          </div>
+          </div> */}
 
           {/* Sign In Button */}
           <button
