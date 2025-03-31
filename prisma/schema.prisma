@@ -1,0 +1,86 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CORPORATE
+  NONPROFIT
+}
+
+enum InitiativeType {
+  VOLUNTEER
+  FUNDRAISE
+}
+
+enum InitiativeStatus {
+  PLANNED
+  ONGOING
+  COMPLETED
+}
+
+model User {
+  id            String      @id @default(uuid())
+  email         String      @unique
+  password      String?
+  role          UserRole
+  name          String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  programs      Program[]
+  supports      Support[]
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+model Program {
+  id          String      @id @default(uuid())
+  title       String
+  description String
+  sdgGoal     String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  initiatives Initiative[]
+  supports    Support[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([sdgGoal])
+}
+
+model Initiative {
+  id          String           @id @default(uuid())
+  type        InitiativeType
+  goal        String
+  startDate   DateTime
+  endDate     DateTime
+  status      InitiativeStatus
+  programId   String
+  program     Program          @relation(fields: [programId], references: [id])
+
+  @@index([programId])
+  @@index([type])
+  @@index([status])
+}
+
+model Support {
+  id          String   @id @default(uuid())
+  programId   String
+  corporateId String
+  message     String
+  supportedAt DateTime @default(now())
+  program     Program  @relation(fields: [programId], references: [id])
+  corporate   User     @relation(fields: [corporateId], references: [id])
+
+  @@index([programId])
+  @@index([corporateId])
+  @@index([supportedAt])
+}
