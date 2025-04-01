@@ -48,7 +48,8 @@ export default function Dashboard() {
     const { data, error } = await supabase
       .from("Program")
       .select("*, initiatives:Initiative(*)")
-      .eq("userId", user.id);
+      .eq("userId", user.id)
+      .order("createdAt", { ascending: false });
     if (error) {
       console.error("Error fetching programs:", error);
       toast.error(error.message);

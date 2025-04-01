@@ -45,23 +45,23 @@ export default function LoginPage() {
       return;
     }
 
-    // Fetch user role from Supabase
-    const { data: userData, error: userError } = await supabase
-      .from("User") // Ensure your table is named correctly
-      .select("role")
-      .eq("id", data.user.id)
-      .single();
+    // Get user metadata directly
+    const user = data.user;
+    if (!user) {
+      setLoading(false);
+      toast.error("User authentication failed");
+      return;
+    }
 
+    const userRole = user.user_metadata?.role; // Fetch role from metadata
     setLoading(false);
 
-    if (userError || !userData) {
+    if (!userRole) {
       toast.error("Failed to fetch user role");
       return;
     }
 
-    const userRole = userData.role;
     console.log("SHOW USER ROLE >>>>>> ", userRole);
-
     toast.success("Login successful!");
 
     // Redirect based on role
@@ -73,6 +73,7 @@ export default function LoginPage() {
       router.push("/"); // Default fallback
     }
   };
+
 
   return (
     <div className="flex min-h-screen">

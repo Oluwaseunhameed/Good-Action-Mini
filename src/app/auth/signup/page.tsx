@@ -47,9 +47,26 @@ export default function SignupPage() {
 
     if (authError) {
       toast.error(authError.message);
-    } else {
+      return;
+    }
+
+    // Insert a record into your public "User" table
+    if (authData.user) {
+      const { error: insertError } = await supabase.from("User").insert([
+        {
+          id: authData.user.id,
+          email: authData.user.email,
+          role: authData.user.user_metadata.role || role, // ensure role is provided
+          password: "placeholder", // dummy value
+        },
+      ]);
+      if (insertError) {
+        console.error("Error inserting user profile:", insertError);
+        toast.error("Error inserting user profile.");
+        return;
+      }
       toast.success("Signup successful! Please verify your email.");
-      router.push("/auth/verify");
+      router.push("/verify-email");
     }
   };
 

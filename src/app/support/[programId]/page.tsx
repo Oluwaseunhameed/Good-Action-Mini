@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
+import { ensureUserProfile } from "@/utils/ensureUserProfile";
 
 export default function SupportFormPage() {
   // Extract the programId from the URL parameters.
@@ -37,6 +38,9 @@ export default function SupportFormPage() {
       return;
     }
     console.log("User:", user);
+
+    // Ensure the user profile exists in the public User table
+    await ensureUserProfile(user);
 
     // Prepare the payload.
     const payload = {
