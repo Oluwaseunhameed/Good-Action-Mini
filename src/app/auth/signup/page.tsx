@@ -9,6 +9,11 @@ import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 
+// Simple sanitization function (you can expand this as needed)
+function sanitizeInput(input: string): string {
+  return input.replace(/<[^>]*>?/gm, "").trim();
+}
+
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -26,17 +31,22 @@ export default function SignupPage() {
     }
 
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: name, role },
-      },
+
+    // Sanitize inputs before sending
+    const cleanName = sanitizeInput(name);
+    const cleanEmail = sanitizeInput(email);
+    const cleanPassword = sanitizeInput(password);
+
+    // Sign up with Supabase Auth and include role in user metadata
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: cleanEmail,
+      password: cleanPassword,
+      options: { data: { full_name: cleanName, role } },
     });
     setLoading(false);
 
-    if (error) {
-      toast.error(error.message);
+    if (authError) {
+      toast.error(authError.message);
     } else {
       toast.success("Signup successful! Please verify your email.");
       router.push("/auth/verify");
@@ -48,7 +58,7 @@ export default function SignupPage() {
       {/* Left Side - Hidden on mobile */}
       <div className="hidden md:flex w-1/2 relative">
         <Image
-          src="/login-bg.jpg" // Replace with your background image for signup
+          src="/login-bg.jpg" // Ensure this image exists in your public folder
           alt="Signup Background"
           fill
           className="object-cover"
@@ -68,7 +78,7 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Right Side */}
+      {/* Right Side - Form */}
       <div className="w-full md:w-1/2 flex justify-center items-center bg-gray-100">
         <div className="bg-white shadow-lg p-8 rounded-lg w-[400px]">
           <h2 className="text-2xl font-bold text-center">Create an account</h2>
@@ -79,7 +89,7 @@ export default function SignupPage() {
             </span>
           </div>
 
-          {/* Name */}
+          {/* Full Name */}
           <div className="mb-4">
             <label className="block text-sm text-gray-700">Full Name</label>
             <input
@@ -103,6 +113,22 @@ export default function SignupPage() {
               placeholder="Email"
               required
             />
+          </div>
+
+          {/* Role Selection */}
+          <div className="mb-4">
+            <label className="block text-sm text-gray-700">Account Type</label>
+            <select
+              value={role}
+              onChange={(e) =>
+                setRole(e.target.value as "NONPROFIT" | "CORPORATE")
+              }
+              className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#0D1527]"
+              required
+            >
+              <option value="NONPROFIT">Nonprofit</option>
+              <option value="CORPORATE">Corporate</option>
+            </select>
           </div>
 
           {/* Password */}
@@ -140,7 +166,7 @@ export default function SignupPage() {
             />
           </div>
 
-          {/* Sign Up Button */}
+          {/* Signup Button */}
           <button
             onClick={handleSignup}
             disabled={loading}
@@ -162,7 +188,7 @@ export default function SignupPage() {
   );
 }
 
-// Animated "O" in GOODACTION
+// Animated "O" in GOODACTION (reuse same as Login)
 const AnimatedO = () => {
   return (
     <svg
