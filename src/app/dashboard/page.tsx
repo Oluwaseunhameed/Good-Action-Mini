@@ -5,29 +5,12 @@ import toast from "react-hot-toast";
 import { supabase } from "@/lib/supabaseClient";
 import ProgramCard from "@/components/ProgramCard";
 import { ClipLoader } from "react-spinners";
+import { Program } from "@/types/program";
 
 // Simple sanitization function
 function sanitizeInput(input: string): string {
   return input.replace(/<[^>]*>?/gm, "").trim();
 }
-
-type Initiative = {
-  id: string;
-  type: "VOLUNTEER" | "FUNDRAISE";
-  goal: string;
-  startDate: string;
-  endDate: string;
-  status: "PLANNED" | "ONGOING" | "COMPLETED";
-};
-
-type Program = {
-  id: string;
-  title: string;
-  description: string;
-  sdgGoal: string;
-  createdAt: string;
-  initiatives: Initiative[];
-};
 
 export default function Dashboard() {
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -47,9 +30,11 @@ export default function Dashboard() {
     }
     const { data, error } = await supabase
       .from("Program")
-      .select("*, initiatives:Initiative(*)")
+      .select(
+        "*, initiatives:Initiative(*), supports:Support(*, corporate:User(email, name))"
+      )
       .eq("userId", user.id)
-      .order("createdAt", { ascending: false });
+      .order("createdAt", { ascending: false }); // latest first
     if (error) {
       console.error("Error fetching programs:", error);
       toast.error(error.message);
