@@ -33,17 +33,44 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    setLoading(false);
 
     if (error) {
+      setLoading(false);
       toast.error(error.message);
+      return;
+    }
+
+    // Fetch user role from Supabase
+    const { data: userData, error: userError } = await supabase
+      .from("User") // Ensure your table is named correctly
+      .select("role")
+      .eq("id", data.user.id)
+      .single();
+
+    setLoading(false);
+
+    if (userError || !userData) {
+      toast.error("Failed to fetch user role");
+      return;
+    }
+
+    const userRole = userData.role;
+    console.log("SHOW USER ROLE >>>>>> ", userRole);
+
+    toast.success("Login successful!");
+
+    // Redirect based on role
+    if (userRole === "NONPROFIT") {
+      router.push("/dashboard");
+    } else if (userRole === "CORPORATE") {
+      router.push("/programs");
     } else {
-      toast.success("Login successful!");
-      router.push("/home");
+      router.push("/"); // Default fallback
     }
   };
 

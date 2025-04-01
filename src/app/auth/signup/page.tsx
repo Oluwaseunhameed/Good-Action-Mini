@@ -39,7 +39,7 @@ export default function SignupPage() {
       toast.error(error.message);
     } else {
       toast.success("Signup successful! Please verify your email.");
-      router.push("/verify-email");
+      router.push("/verify");
     }
   };
 
